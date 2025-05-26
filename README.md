@@ -1,1 +1,420 @@
-# school
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>نام مکتب - سامانه مدیریت</title>
+
+  <!-- فونت زیبا از گوگل -->
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ریست و پایه */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Vazirmatn', Tahoma, sans-serif;
+      background: url('https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: #2c3e50;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      padding: 30px 40px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    h1, h2, h3 {
+      margin-bottom: 20px;
+      color: #34495e;
+      font-weight: 700;
+    }
+
+    input, select, textarea, button {
+      width: 100%;
+      padding: 12px 15px;
+      margin-top: 12px;
+      border-radius: 10px;
+      border: 1.5px solid #bdc3c7;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+      font-family: 'Vazirmatn', Tahoma, sans-serif;
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #2980b9;
+      box-shadow: 0 0 5px rgba(41, 128, 185, 0.5);
+    }
+
+    button {
+      background-color: #2980b9;
+      color: white;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      margin-top: 20px;
+      box-shadow: 0 5px 12px rgba(41,128,185,0.4);
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #1f618d;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      max-height: 150px;
+      overflow-y: auto;
+      margin-top: 15px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background-color: #f4f6f7;
+      text-align: right;
+    }
+    ul li {
+      padding: 8px 15px;
+      border-bottom: 1px solid #ddd;
+      font-weight: 600;
+      color: #34495e;
+    }
+    ul li:last-child {
+      border-bottom: none;
+    }
+
+    .record {
+      background: #ecf0f1;
+      border-radius: 12px;
+      padding: 15px 20px;
+      margin: 12px 0;
+      text-align: right;
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.05);
+    }
+    .record p {
+      margin: 5px 0;
+      font-size: 14.5px;
+    }
+    .record strong {
+      color: #2c3e50;
+    }
+
+    /* Scrollbar for lists */
+    ul::-webkit-scrollbar {
+      width: 8px;
+    }
+    ul::-webkit-scrollbar-thumb {
+      background-color: #2980b9;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container" id="login-panel">
+    <h1>نام مکتب - سامانه مدیریت</h1>
+
+    <select id="userTypeSelect" aria-label="نوع کاربری">
+      <option value="admin">مدیر</option>
+      <option value="teacher">معلم</option>
+      <option value="parent">والدین</option>
+    </select>
+
+    <input type="text" id="username" placeholder="نام کاربری" autocomplete="username" />
+    <input type="password" id="password" placeholder="رمز عبور" autocomplete="current-password" />
+    <button onclick="handleLogin()">ورود</button>
+  </div>
+
+  <!-- پنل مدیر -->
+  <div class="container hidden" id="admin-panel">
+    <h2>پنل مدیریت</h2>
+
+    <section style="margin-bottom: 25px;">
+      <h3>افزودن معلم</h3>
+      <input type="text" id="teacherUser" placeholder="نام کاربری معلم" />
+      <input type="password" id="teacherPass" placeholder="رمز عبور معلم" />
+      <button onclick="registerSpecificUser('teacher')">ایجاد حساب معلم</button>
+      <ul id="teacherList"></ul>
+    </section>
+
+    <section>
+      <h3>افزودن والد</h3>
+      <input type="text" id="parentUser" placeholder="نام کاربری والد" />
+      <input type="password" id="parentPass" placeholder="رمز عبور والد" />
+      <button onclick="registerSpecificUser('parent')">ایجاد حساب والد</button>
+      <ul id="parentList"></ul>
+    </section>
+
+    <button style="margin-top: 30px;" onclick="logout()">خروج</button>
+  </div>
+
+  <!-- پنل معلم -->
+  <div class="container hidden" id="teacher-panel">
+    <h2>پنل معلم</h2>
+
+    <input type="text" id="studentName" placeholder="نام شاگرد" />
+    <input type="text" id="studentFather" placeholder="نام پدر شاگرد" />
+
+    <input type="text" id="subject" placeholder="مضمون" />
+
+    <select id="grade">
+      <option disabled selected>صنف را انتخاب کنید</option>
+      <!-- صنف‌ها از 1 تا 10 هرکدام الف و ب -->
+      <option value="۱ الف">۱ الف</option>
+      <option value="۱ ب">۱ ب</option>
+      <option value="۲ الف">۲ الف</option>
+      <option value="۲ ب">۲ ب</option>
+      <option value="۳ الف">۳ الف</option>
+      <option value="۳ ب">۳ ب</option>
+      <option value="۴ الف">۴ الف</option>
+      <option value="۴ ب">۴ ب</option>
+      <option value="۵ الف">۵ الف</option>
+      <option value="۵ ب">۵ ب</option>
+      <option value="۶ الف">۶ الف</option>
+      <option value="۶ ب">۶ ب</option>
+      <option value="۷ الف">۷ الف</option>
+      <option value="۷ ب">۷ ب</option>
+      <option value="۸ الف">۸ الف</option>
+      <option value="۸ ب">۸ ب</option>
+      <option value="۹ الف">۹ الف</option>
+      <option value="۹ ب">۹ ب</option>
+      <option value="۱۰ الف">۱۰ الف</option>
+      <option value="۱۰ ب">۱۰ ب</option>
+    </select>
+
+    <input type="date" id="recordDate" />
+
+    <select id="performance">
+      <option value="عالی">عالی</option>
+      <option value="متوسط">متوسط</option>
+      <option value="ضعیف">ضعیف</option>
+    </select>
+
+    <textarea id="extraNote" placeholder="توضیحات اضافی"></textarea>
+
+    <button onclick="submitStudentData()">ثبت آمار</button>
+    <p id="teacherMessage" style="color:green; margin-top: 10px;"></p>
+
+    <h3 style="margin-top: 30px;">آمار ثبت شده شاگردان</h3>
+    <ul id="teacherRecordsList" style="max-height: 250px; overflow-y: auto;"></ul>
+
+    <button style="margin-top: 25px;" onclick="logout()">خروج</button>
+  </div>
+
+  <!-- پنل والدین -->
+  <div class="container hidden" id="parent-panel">
+    <h2>پنل والدین</h2>
+
+    <div id="studentInfo"></div>
+
+    <button style="margin-top: 25px;" onclick="logout()">خروج</button>
+  </div>
+
+  <script>
+    // کاربران اولیه
+    const users = JSON.parse(localStorage.getItem('users')) || {
+      admin: { "مدیر": "1234" },
+      teacher: {},
+      parent: {}
+    };
+
+    // اطلاعات دانش‌آموزان
+    const studentRecords = JSON.parse(localStorage.getItem('studentRecords')) || [];
+
+    let currentUser = null;
+    let currentRole = null;
+
+    // ذخیره کاربران در LocalStorage
+    function saveUsers() {
+      localStorage.setItem('users', JSON.stringify(users));
+    }
+
+    // ذخیره آمار شاگردان در LocalStorage
+    function saveRecords() {
+      localStorage.setItem('studentRecords', JSON.stringify(studentRecords));
+    }
+
+    // بروزرسانی لیست معلم‌ها و والدین در پنل مدیر
+    function updateUserLists() {
+      document.getElementById("teacherList").innerHTML = Object.keys(users.teacher).length
+        ? Object.keys(users.teacher).map(u => `<li>👨‍🏫 ${u}</li>`).join('')
+        : "<li style='color:#999;'>معلمی ثبت نشده است</li>";
+
+      document.getElementById("parentList").innerHTML = Object.keys(users.parent).length
+        ? Object.keys(users.parent).map(u => `<li>👨‍👩‍👧 ${u}</li>`).join('')
+        : "<li style='color:#999;'>والدی ثبت نشده است</li>";
+    }
+
+    // ثبت کاربر جدید (معلم یا والد)
+    function registerSpecificUser(role) {
+      const username = document.getElementById(role + "User").value.trim();
+      const password = document.getElementById(role + "Pass").value.trim();
+
+      if (!username || !password) {
+        alert("لطفاً نام کاربری و رمز را وارد کنید.");
+        return;
+      }
+
+      if(users[role][username]){
+        alert("این نام کاربری قبلاً ثبت شده است.");
+        return;
+      }
+
+      users[role][username] = password;
+      saveUsers();
+
+      document.getElementById(role + "User").value = "";
+      document.getElementById(role + "Pass").value = "";
+      updateUserLists();
+      alert("حساب کاربری با موفقیت ایجاد شد.");
+    }
+
+    // ورود به سیستم
+    function handleLogin() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const userType = document.getElementById("userTypeSelect").value;
+
+      if (users[userType] && users[userType][username] === password) {
+        currentUser = username;
+        currentRole = userType;
+
+        document.getElementById("login-panel").classList.add("hidden");
+        document.getElementById(userType + "-panel").classList.remove("hidden");
+
+        clearLoginInputs();
+
+        if (userType === "admin") updateUserLists();
+        if (userType === "parent") showStudentInfo();
+        if (userType === "teacher") showTeacherRecords();
+      } else {
+        alert("نام کاربری یا رمز اشتباه است!");
+      }
+    }
+
+    // پاکسازی نام کاربری و رمز ورود
+    function clearLoginInputs() {
+      document.getElementById("username").value = "";
+      document.getElementById("password").value = "";
+    }
+
+    // ثبت آمار شاگرد
+    function submitStudentData() {
+      const name = document.getElementById("studentName").value.trim();
+      const father = document.getElementById("studentFather").value.trim();
+      const subject = document.getElementById("subject").value.trim();
+      const grade = document.getElementById("grade").value;
+      const performance = document.getElementById("performance").value;
+      const note = document.getElementById("extraNote").value.trim();
+      const date = document.getElementById("recordDate").value;
+
+      if (!name || !father || !subject || !grade || !date) {
+        alert("لطفاً تمام فیلدهای الزامی را پر کنید.");
+        return;
+      }
+
+      const record = {
+        teacher: currentUser,
+        name,
+        father,
+        subject,
+        grade,
+        performance,
+        note,
+        date
+      };
+
+      studentRecords.push(record);
+      saveRecords();
+
+      document.getElementById("teacherMessage").innerText = "آمار شاگرد با موفقیت ثبت شد.";
+
+      // پاکسازی فرم
+      document.getElementById("studentName").value = "";
+      document.getElementById("studentFather").value = "";
+      document.getElementById("subject").value = "";
+      document.getElementById("grade").selectedIndex = 0;
+      document.getElementById("performance").value = "عالی";
+      document.getElementById("extraNote").value = "";
+      document.getElementById("recordDate").value = "";
+
+      showTeacherRecords();
+    }
+
+    // نمایش آمار ثبت شده برای معلم (فقط نام شاگرد)
+    function showTeacherRecords() {
+      const list = document.getElementById("teacherRecordsList");
+      list.innerHTML = "";
+
+      const filtered = studentRecords.filter(r => r.teacher === currentUser);
+      if (filtered.length === 0) {
+        list.innerHTML = "<li style='color:#999;'>هیچ آماری ثبت نشده است.</li>";
+        return;
+      }
+
+      filtered.forEach(rec => {
+        list.innerHTML += `<li>📋 ${rec.name} (${rec.grade}) - ${rec.date}</li>`;
+      });
+    }
+
+    // نمایش اطلاعات دانش‌آموز برای والدین
+    function showStudentInfo() {
+      const infoDiv = document.getElementById("studentInfo");
+      infoDiv.innerHTML = "";
+
+      // پیدا کردن رکوردهایی که نام پدر شاگرد با نام کاربری والد برابر است
+      const childRecords = studentRecords.filter(r => r.father === currentUser);
+
+      if (childRecords.length === 0) {
+        infoDiv.innerHTML = "<p style='color:red;'>آمار فرزند شما ثبت نشده است.</p>";
+        return;
+      }
+
+      childRecords.forEach(r => {
+        infoDiv.innerHTML += `
+          <div class="record">
+            <p><strong>نام شاگرد:</strong> ${r.name}</p>
+            <p><strong>نام پدر:</strong> ${r.father}</p>
+            <p><strong>مضمون:</strong> ${r.subject}</p>
+            <p><strong>صنف:</strong> ${r.grade}</p>
+            <p><strong>وضعیت:</strong> ${r.performance}</p>
+            <p><strong>تاریخ ثبت:</strong> ${r.date}</p>
+            <p><strong>توضیحات:</strong> ${r.note || '---'}</p>
+          </div>
+        `;
+      });
+    }
+
+    // خروج از سیستم
+    function logout() {
+      currentUser = null;
+      currentRole = null;
+
+      clearLoginInputs();
+
+      document.getElementById("login-panel").classList.remove("hidden");
+      document.getElementById("admin-panel").classList.add("hidden");
+      document.getElementById("teacher-panel").classList.add("hidden");
+      document.getElementById("parent-panel").classList.add("hidden");
+    }
+
+    // صفحه بارگذاری اولیه
+    window.onload = () => {
+      updateUserLists();
+    }
+  </script>
+</body>
+</html>
